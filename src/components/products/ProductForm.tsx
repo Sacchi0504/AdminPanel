@@ -184,11 +184,11 @@ export default function ProductForm({
           {/* Price */}
           <div id="field-price">
             <label htmlFor="input-price" className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">
-              Price (USD) <span className="text-teal-400">*</span>
+              Price (INR ₹) <span className="text-teal-400">*</span>
             </label>
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                <DollarSign className="w-4 h-4" />
+              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 font-bold text-sm">
+                ₹
               </div>
               <input
                 id="input-price"

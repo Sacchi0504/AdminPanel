@@ -5,6 +5,7 @@ import axios from 'axios';
 import { Product, ProductFilterParams } from '@/types/product';
 import { getProducts, searchProducts, getProductsByCategory } from '@/api/products';
 import { useProductsMutation } from '@/context/ProductsContext';
+import { filterVegetarianOnly } from '@/utils/productFilters';
 
 interface UseProductsResult {
   products: Product[];
@@ -76,41 +77,57 @@ export function useProducts(filterParams: ProductFilterParams): UseProductsResul
             signal: abortController.signal,
           });
 
+          // Exclude non-vegetarian products
+          const vegOnly = filterVegetarianOnly(data.products);
+
           if (isCombinedFilterActive) {
             // Apply category filtering client-side as per PRD Section 20
-            const filtered = data.products.filter(
+            const filtered = vegOnly.filter(
               (p) => p.category.toLowerCase() === category.toLowerCase()
             );
             responseTotal = filtered.length;
-            // Paginate client-side slice
             responseProducts = filtered.slice(skip, skip + pageSize);
           } else {
-            responseProducts = data.products;
-            responseTotal = data.total;
+            responseProducts = vegOnly;
+            responseTotal = Math.max(0, data.total - (data.products.length - vegOnly.length));
           }
         } else if (category.trim()) {
           // Case B: Category filter without search
+          // For groceries, fetch all category items and filter out non-veg items accurately
+          const isGroceries = category.trim().toLowerCase() === 'groceries';
           const data = await getProductsByCategory({
             category: category.trim(),
-            limit: pageSize,
-            skip,
+            limit: isGroceries ? 100 : pageSize,
+            skip: isGroceries ? 0 : skip,
             sortBy: sort || undefined,
             order: sort ? order : undefined,
             signal: abortController.signal,
           });
-          responseProducts = data.products;
-          responseTotal = data.total;
+
+          const vegOnly = filterVegetarianOnly(data.products);
+
+          if (isGroceries) {
+            responseTotal = vegOnly.length;
+            responseProducts = vegOnly.slice(skip, skip + pageSize);
+          } else {
+            responseProducts = vegOnly;
+            responseTotal = Math.max(0, data.total - (data.products.length - vegOnly.length));
+          }
         } else {
           // Case C: Standard catalog listing with server-side pagination & sorting
+          // Fetch extra buffer to account for the 4 non-vegetarian items in catalog
           const data = await getProducts({
-            limit: pageSize,
+            limit: pageSize + 4,
             skip,
             sortBy: sort || undefined,
             order: sort ? order : undefined,
             signal: abortController.signal,
           });
-          responseProducts = data.products;
-          responseTotal = data.total;
+
+          const vegOnly = filterVegetarianOnly(data.products);
+          responseProducts = vegOnly.slice(0, pageSize);
+          // 4 non-veg products in DummyJSON are removed from total catalog
+          responseTotal = Math.max(0, data.total - 4);
         }
 
         // 3. Race condition check: Ensure this is still the latest active request

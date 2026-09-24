@@ -4,13 +4,15 @@ import React from 'react';
 import Link from 'next/link';
 import { Product } from '@/types/product';
 import { Eye, Edit3, Trash2, Star } from 'lucide-react';
+import { formatINR } from '@/utils/currency';
 
 interface ProductCardProps {
   product: Product;
+  catalogQueryString?: string;
   onDeleteClick: (product: Product) => void;
 }
 
-export default function ProductCard({ product, onDeleteClick }: ProductCardProps) {
+export default function ProductCard({ product, catalogQueryString = '', onDeleteClick }: ProductCardProps) {
   const getStockBadge = (stock: number) => {
     if (stock <= 0) {
       return (
@@ -61,7 +63,7 @@ export default function ProductCard({ product, onDeleteClick }: ProductCardProps
         {/* Title & Brand */}
         <div className="text-xs text-teal-400 font-medium">{product.brand || 'General'}</div>
         <Link
-          href={`/products/${product.id}`}
+          href={`/products/${product.id}${catalogQueryString}`}
           className="text-base font-bold text-white hover:text-teal-400 transition-colors line-clamp-1 mt-0.5"
         >
           {product.title}
@@ -74,7 +76,7 @@ export default function ProductCard({ product, onDeleteClick }: ProductCardProps
       <div className="mt-4 pt-3 border-t border-slate-800/80">
         <div className="flex items-center justify-between mb-3">
           <div>
-            <span className="text-lg font-bold text-white">${product.price.toFixed(2)}</span>
+            <span className="text-lg font-bold text-white">{formatINR(product.price)}</span>
             {product.discountPercentage && product.discountPercentage > 0 ? (
               <span className="ml-2 text-xs font-medium text-teal-400">
                 {product.discountPercentage.toFixed(0)}% OFF
@@ -90,14 +92,14 @@ export default function ProductCard({ product, onDeleteClick }: ProductCardProps
         {/* Action Buttons */}
         <div className="grid grid-cols-3 gap-2">
           <Link
-            href={`/products/${product.id}`}
+            href={`/products/${product.id}${catalogQueryString}`}
             className="flex items-center justify-center gap-1 py-2 px-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium border border-slate-700/80 transition-colors"
           >
             <Eye className="w-3.5 h-3.5 text-teal-400" />
             <span>View</span>
           </Link>
           <Link
-            href={`/products/${product.id}/edit`}
+            href={`/products/${product.id}/edit${catalogQueryString}`}
             className="flex items-center justify-center gap-1 py-2 px-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium border border-slate-700/80 transition-colors"
           >
             <Edit3 className="w-3.5 h-3.5 text-amber-400" />

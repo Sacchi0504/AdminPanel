@@ -23,6 +23,7 @@ import EmptyState from '@/components/common/EmptyState';
 import ErrorState from '@/components/common/ErrorState';
 import { Info, Plus, RotateCcw, Package, Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import { saveCatalogQuery } from '@/utils/navigation';
 
 function ProductsDashboard() {
   const router = useRouter();
@@ -30,6 +31,17 @@ function ProductsDashboard() {
   const searchParams = useSearchParams();
   const { success: toastSuccess, error: toastError } = useToast();
   const { deleteLocalProduct } = useProductsMutation();
+
+  // Compute catalog query string to preserve pagination & filters across views
+  const catalogQueryString = useMemo(() => {
+    const str = searchParams?.toString();
+    return str ? `?${str}` : '';
+  }, [searchParams]);
+
+  // Persist query in sessionStorage
+  React.useEffect(() => {
+    saveCatalogQuery(catalogQueryString);
+  }, [catalogQueryString]);
 
   // Parse and normalize all URL parameters
   const currentFilters = useMemo(() => {
@@ -167,7 +179,7 @@ function ProductsDashboard() {
           )}
 
           <Link
-            href="/products/new"
+            href={`/products/new${catalogQueryString}`}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-sm font-semibold transition-all duration-150 shadow-md shadow-teal-600/20"
           >
             <Plus className="w-4 h-4" />
@@ -230,6 +242,7 @@ function ProductsDashboard() {
               products={products}
               currentSort={currentFilters.sort}
               currentOrder={currentFilters.order}
+              catalogQueryString={catalogQueryString}
               onSortChange={handleSortChange}
               onDeleteClick={(p) => setProductToDelete(p)}
             />
@@ -239,6 +252,7 @@ function ProductsDashboard() {
           <div className="md:hidden">
             <ProductCardList
               products={products}
+              catalogQueryString={catalogQueryString}
               onDeleteClick={(p) => setProductToDelete(p)}
             />
           </div>

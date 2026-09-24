@@ -9,6 +9,7 @@ interface ProductTableProps {
   products: Product[];
   currentSort: SortField;
   currentOrder: SortOrder;
+  catalogQueryString?: string;
   onSortChange: (field: SortField, order: SortOrder) => void;
   onDeleteClick: (product: Product) => void;
 }
@@ -17,6 +18,7 @@ export default function ProductTable({
   products,
   currentSort,
   currentOrder,
+  catalogQueryString = '',
   onSortChange,
   onDeleteClick,
 }: ProductTableProps) {
@@ -98,6 +100,7 @@ export default function ProductTable({
               <ProductRow
                 key={product.id}
                 product={product}
+                catalogQueryString={catalogQueryString}
                 onDeleteClick={onDeleteClick}
               />
             ))}

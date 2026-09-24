@@ -4,13 +4,15 @@ import React from 'react';
 import Link from 'next/link';
 import { Product } from '@/types/product';
 import { Eye, Edit3, Trash2, Star } from 'lucide-react';
+import { formatINR } from '@/utils/currency';
 
 interface ProductRowProps {
   product: Product;
+  catalogQueryString?: string;
   onDeleteClick: (product: Product) => void;
 }
 
-export default function ProductRow({ product, onDeleteClick }: ProductRowProps) {
+export default function ProductRow({ product, catalogQueryString = '', onDeleteClick }: ProductRowProps) {
   // Stock status badge configuration
   const getStockBadge = (stock: number) => {
     if (stock <= 0) {
@@ -53,7 +55,7 @@ export default function ProductRow({ product, onDeleteClick }: ProductRowProps) 
           </div>
           <div className="min-w-0 max-w-xs">
             <Link
-              href={`/products/${product.id}`}
+              href={`/products/${product.id}${catalogQueryString}`}
               className="text-sm font-semibold text-slate-100 hover:text-teal-400 transition-colors line-clamp-1"
               title={product.title}
             >
@@ -79,9 +81,9 @@ export default function ProductRow({ product, onDeleteClick }: ProductRowProps) 
         </span>
       </td>
 
-      {/* Price */}
+      {/* Price in INR */}
       <td className="py-3 px-4 font-semibold text-sm text-slate-100">
-        ${product.price.toFixed(2)}
+        {formatINR(product.price)}
         {product.discountPercentage && product.discountPercentage > 0 ? (
           <span className="block text-[11px] font-normal text-teal-400">
             {product.discountPercentage.toFixed(0)}% off
@@ -111,7 +113,7 @@ export default function ProductRow({ product, onDeleteClick }: ProductRowProps) 
       <td className="py-3 px-4 text-right">
         <div className="flex items-center justify-end gap-1.5">
           <Link
-            href={`/products/${product.id}`}
+            href={`/products/${product.id}${catalogQueryString}`}
             title="View Details"
             className="p-1.5 rounded-lg text-slate-400 hover:text-teal-400 hover:bg-slate-800 transition-colors"
             aria-label={`View details for ${product.title}`}
@@ -119,7 +121,7 @@ export default function ProductRow({ product, onDeleteClick }: ProductRowProps) 
             <Eye className="w-4 h-4" />
           </Link>
           <Link
-            href={`/products/${product.id}/edit`}
+            href={`/products/${product.id}/edit${catalogQueryString}`}
             title="Edit Product"
             className="p-1.5 rounded-lg text-slate-400 hover:text-amber-400 hover:bg-slate-800 transition-colors"
             aria-label={`Edit ${product.title}`}
