@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, ReactNode } from 'react';
-import { useRouter, usePathname, useSearchParams } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { Loader2 } from 'lucide-react';
 
@@ -13,16 +13,14 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      const fullPath = searchParams?.toString()
-        ? `${pathname}?${searchParams.toString()}`
-        : pathname;
+      const search = typeof window !== 'undefined' ? window.location.search : '';
+      const fullPath = search ? `${pathname}${search}` : pathname;
       router.replace(`/login?from=${encodeURIComponent(fullPath)}`);
     }
-  }, [isAuthenticated, isLoading, router, pathname, searchParams]);
+  }, [isAuthenticated, isLoading, router, pathname]);
 
   if (isLoading) {
     return (
